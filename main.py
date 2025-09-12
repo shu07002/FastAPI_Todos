@@ -9,8 +9,8 @@ app = FastAPI()
 # To-Do 항목 모델
 class TodoItem(BaseModel):
     id: int
-    student_id: str
-    name: str
+    title: str
+    description: str
     completed: bool
 
 # JSON 파일 경로
