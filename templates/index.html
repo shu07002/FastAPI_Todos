@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,21 +18,45 @@
         const response = await fetch("/todos");
         const todos = await response.json();
         const todoList = document.getElementById("todo-list");
-
         todoList.innerHTML = "";
         todos.forEach((todo) => {
           const li = document.createElement("li");
-          const editButton = document.createElement("button");
-          const deleteButton = document.createElement("button");
-
-          editButton.textContent = "Edit";
-          deleteButton.textContent = "Delete";
           li.textContent = `${todo.title}: ${todo.description} (Completed: ${todo.completed})`;
+          const editButton = document.createElement("button");
+          editButton.textContent = "Edit";
+          editButton.onclick = () => editTodo(todo.id);
+          const deleteButton = document.createElement("button");
+          deleteButton.textContent = "Delete";
+          deleteButton.onclick = () => deleteTodo(todo.id);
           li.appendChild(editButton);
           li.appendChild(deleteButton);
           todoList.appendChild(li);
-          todoList.appendChild(li);
         });
+      }
+
+      async function editTodo(id) {
+        const title = prompt("Enter new title:");
+        const description = prompt("Enter new description:");
+        const completed = confirm("Is this task completed?");
+        const response = await fetch(`/todos/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id, title, description, completed }),
+        });
+        if (response.ok) {
+          fetchTodos();
+        }
+      }
+
+      async function deleteTodo(id) {
+        const response = await fetch(`/todos/${id}`, {
+          method: "DELETE",
+        });
+        if (response.ok) {
+          fetchTodos();
+        }
       }
 
       document
@@ -41,7 +65,6 @@
           event.preventDefault();
           const title = document.getElementById("title").value;
           const description = document.getElementById("description").value;
-
           const response = await fetch("/todos", {
             method: "POST",
             headers: {
