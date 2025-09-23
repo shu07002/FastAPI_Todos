@@ -3,84 +3,153 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>To-Do List</title>
+    <title>Improved To-Do List</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      li.completed {
+        text-decoration: line-through;
+        color: gray;
+      }
+      .todo-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 5px;
+      }
+      .actions button {
+        margin-left: 5px;
+      }
+    </style>
   </head>
   <body>
     <h1>To-Do List</h1>
+
+    <!-- 검색 -->
+    <input type="text" id="search" placeholder="Search todos..." />
+
+    <!-- 목록 -->
     <ul id="todo-list"></ul>
+
+    <!-- 입력 -->
     <form id="todo-form">
       <input type="text" id="title" placeholder="Title" required />
       <input type="text" id="description" placeholder="Description" required />
+      <select id="priority">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+      <input type="date" id="dueDate" />
       <button type="submit">Add To-Do</button>
     </form>
+
     <script>
+      let todos = [];
+
       async function fetchTodos() {
         const response = await fetch("/todos");
-        const todos = await response.json();
+        todos = await response.json();
+        renderTodos();
+      }
+
+      function renderTodos() {
         const todoList = document.getElementById("todo-list");
+        const searchQuery = document
+          .getElementById("search")
+          .value.toLowerCase();
         todoList.innerHTML = "";
-        todos.forEach((todo) => {
-          const li = document.createElement("li");
-          li.textContent = `${todo.title}: ${todo.description} (Completed: ${todo.completed})`;
-          const editButton = document.createElement("button");
-          editButton.textContent = "Edit";
-          editButton.onclick = () => editTodo(todo.id);
-          const deleteButton = document.createElement("button");
-          deleteButton.textContent = "Delete";
-          deleteButton.onclick = () => deleteTodo(todo.id);
-          li.appendChild(editButton);
-          li.appendChild(deleteButton);
-          todoList.appendChild(li);
+
+        todos
+          .filter((todo) => todo.title.toLowerCase().includes(searchQuery))
+          .forEach((todo) => {
+            const li = document.createElement("li");
+            li.className = "todo-item" + (todo.completed ? " completed" : "");
+            li.innerHTML = `
+              <span>
+                <strong>[${todo.priority}]</strong> ${todo.title}: ${
+              todo.description
+            } 
+                ${todo.dueDate ? `(Due: ${todo.dueDate})` : ""}
+              </span>
+              <div class="actions">
+                <input type="checkbox" ${
+                  todo.completed ? "checked" : ""
+                } onchange="toggleComplete(${todo.id})" />
+                <button onclick="editTodo(${todo.id})">✏️</button>
+                <button onclick="deleteTodo(${todo.id})">🗑️</button>
+              </div>
+            `;
+            todoList.appendChild(li);
+          });
+      }
+
+      async function toggleComplete(id) {
+        const todo = todos.find((t) => t.id === id);
+        todo.completed = !todo.completed;
+        await fetch(`/todos/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(todo),
         });
+        fetchTodos();
       }
 
       async function editTodo(id) {
-        const title = prompt("Enter new title:");
-        const description = prompt("Enter new description:");
-        const completed = confirm("Is this task completed?");
-        const response = await fetch(`/todos/${id}`, {
+        const todo = todos.find((t) => t.id === id);
+        const title = prompt("Enter new title:", todo.title);
+        const description = prompt("Enter new description:", todo.description);
+        const priority = prompt(
+          "Enter priority (low/medium/high):",
+          todo.priority
+        );
+        const dueDate = prompt(
+          "Enter due date (YYYY-MM-DD):",
+          todo.dueDate || ""
+        );
+        const updated = { ...todo, title, description, priority, dueDate };
+        await fetch(`/todos/${id}`, {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id, title, description, completed }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updated),
         });
-        if (response.ok) {
-          fetchTodos();
-        }
+        fetchTodos();
       }
 
       async function deleteTodo(id) {
-        const response = await fetch(`/todos/${id}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          fetchTodos();
-        }
+        await fetch(`/todos/${id}`, { method: "DELETE" });
+        fetchTodos();
       }
 
       document
         .getElementById("todo-form")
-        .addEventListener("submit", async (event) => {
-          event.preventDefault();
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
           const title = document.getElementById("title").value;
           const description = document.getElementById("description").value;
-          const response = await fetch("/todos", {
+          const priority = document.getElementById("priority").value;
+          const dueDate = document.getElementById("dueDate").value;
+
+          await fetch("/todos", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               id: Date.now(),
               title,
               description,
+              priority,
+              dueDate,
               completed: false,
             }),
           });
-          if (response.ok) {
-            fetchTodos();
-          }
+
+          e.target.reset(); // 입력창 초기화
+          fetchTodos();
         });
+
+      document.getElementById("search").addEventListener("input", renderTodos);
 
       fetchTodos();
     </script>

@@ -1,20 +1,26 @@
 [
     {
-        "id": 1757956367375,
-        "title": "\uac00\uad6c",
-        "description": "\uc1fc\ud30c",
-        "completed": true
+        "id": 1,
+        "title": "의자 구매",
+        "description": "흔들의자",
+        "completed": false,
+        "priority": "low",
+        "dueDate": "2025-09-27"
     },
     {
-        "id": 1757956377601,
-        "title": "\uc758\uc790",
-        "description": "\ud754\ub4e4\uc758\uc790",
-        "completed": false
+        "id": 2,
+        "title": "마우스 구매",
+        "description": "버티컬 마우스",
+        "completed": true,
+        "priority": "high",
+        "dueDate": "2025-09-24"
     },
     {
-        "id": 1757956391198,
-        "title": "\ub9c8\uc6b0\uc2a4",
-        "description": "\ubc84\ud2f0\uceec\ub9c8\uc6b0\uc2a4",
-        "completed": false
+        "id": 3,
+        "title": "마트 장 보기",
+        "description": "계란 필수!",
+        "completed": false,
+        "priority": "medium",
+        "dueDate": "2025-10-03"
     }
 ]
