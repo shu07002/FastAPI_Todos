@@ -31,7 +31,7 @@ def test_get_todos_with_items():
 
 def test_create_todo():
     # id는 자동 생성되므로 보내지 않음
-    todo = {"title": "Test", "description": "Desc", "completed": False}
+    todo = {"id": 1,"title": "Test", "description": "Desc", "completed": False}
     response = client.post("/todos", json=todo)
     assert response.status_code == 200
     data = response.json()
