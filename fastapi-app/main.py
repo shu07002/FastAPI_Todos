@@ -81,5 +81,6 @@ def delete_todo(todo_id: int):
 # ✅ HTML 서빙
 @app.get("/", response_class=HTMLResponse)
 def read_root():
-    with open("templates/index.html", "r", encoding="utf-8") as f:
+    file_path = Path(__file__).parent / "templates" / "index.html"
+    with open(file_path, "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
