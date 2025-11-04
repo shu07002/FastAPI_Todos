@@ -63,6 +63,20 @@ def test_update_todo():
     assert data["completed"] is True
     assert data["priority"] == "high"
 
+def test_get_todos_completed_true():
+    response = client.get("/todos?completed=true")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+    for item in response.json():
+        assert item["completed"] is True
+
+def test_get_todos_completed_false():
+    response = client.get("/todos?completed=false")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+    for item in response.json():
+        assert item["completed"] is False
+
 def test_update_todo_not_found():
     updated_todo = {
         "id": 1,
@@ -90,3 +104,8 @@ def test_delete_todo_not_found():
     response = client.delete("/todos/1")
     assert response.status_code == 404
     assert response.json()["detail"] == "To-Do item not found"
+
+def test_read_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "<html" in response.text 
