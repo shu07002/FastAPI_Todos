@@ -5,8 +5,12 @@ from pydantic import BaseModel
 import json, os, threading
 from pathlib import Path
 from fastapi.responses import HTMLResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI()
+
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
 lock = threading.Lock()
 TODO_FILE = "todo.json"
 

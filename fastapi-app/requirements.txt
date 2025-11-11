@@ -4,4 +4,5 @@ pytest
 pytest-html
 httpx
 pytest-cov
-requests
+prometheus-fastapi-instrumentator
+prometheus-client
